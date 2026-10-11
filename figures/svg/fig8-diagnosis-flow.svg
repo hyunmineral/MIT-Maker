@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700" font-family="Segoe UI, Malgun Gothic, sans-serif">
+  <rect width="1000" height="700" fill="#ffffff"/>
+  <text x="500" y="36" font-size="23" font-weight="700" text-anchor="middle" fill="#1a1a2e">그림 8. 문제 해결 — SWD 무응답 진단과 원인 확인</text>
+  <text x="500" y="60" font-size="13" text-anchor="middle" fill="#6b7280">증상: Unable to get core ID · 타겟 전압 3.21 V 정상</text>
+
+  <rect x="340" y="78" width="320" height="52" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="500" y="100" font-size="15" font-weight="700" text-anchor="middle" fill="#991b1b">SWD / JTAG 디버그 포트 완전 무응답</text>
+  <text x="500" y="120" font-size="12" text-anchor="middle" fill="#b91c1c">2026-09-20 정상 → 2주 보관 → 2026-10-03 사망</text>
+
+  <line x1="500" y1="130" x2="500" y2="156" stroke="#374151" stroke-width="2" marker-end="url(#a8)"/>
+  <defs><marker id="a8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#374151"/></marker></defs>
+
+  <text x="60" y="176" font-size="15" font-weight="700" fill="#0f172a">배제한 가설 9건</text>
+
+  <g font-size="12">
+    <rect x="60" y="190" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="208" font-weight="700" fill="#334155">① baud 불일치</text>
+    <text x="76" y="224" fill="#64748b">COM4 6종 스윕 → 전부 0 바이트</text>
+    <text x="462" y="216" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="520" y="190" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="536" y="208" font-weight="700" fill="#334155">② ST-LINK 구 펌웨어</text>
+    <text x="536" y="224" fill="#64748b">이미 V2J48M35 (문제 FW V2J28 아님)</text>
+    <text x="922" y="216" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="60" y="240" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="258" font-weight="700" fill="#334155">③ lingering Java/CLI 프로세스</text>
+    <text x="76" y="274" fill="#64748b">프로세스 없음 확인</text>
+    <text x="462" y="266" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="520" y="240" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="536" y="258" font-weight="700" fill="#334155">④ USB 재삽입 / ST-LINK bad state</text>
+    <text x="536" y="274" fill="#64748b">3 인터페이스 정상 재등록, 여전히 실패</text>
+    <text x="922" y="266" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="60" y="290" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="308" font-weight="700" fill="#334155">⑤ RDP Level 2 (디버그 영구 차단)</text>
+    <text x="76" y="324" fill="#64748b">OPTR=0xFBEFF8AA → RDP=0xAA = Level 0</text>
+    <text x="462" y="316" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="520" y="290" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="536" y="308" font-weight="700" fill="#334155">⑥ NRST가 GPIO로 변경</text>
+    <text x="536" y="324" fill="#64748b">NRST_MODE=0b11 표준 reset I/O</text>
+    <text x="922" y="316" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="60" y="340" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="358" font-weight="700" fill="#334155">⑦ SWD 클럭 과속</text>
+    <text x="76" y="374" fill="#64748b">480 / 100 / 15 / 5 kHz 전부 실패</text>
+    <text x="462" y="366" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="520" y="340" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="536" y="358" font-weight="700" fill="#334155">⑧ 펌웨어가 SWD 핀 재할당</text>
+    <text x="536" y="374" fill="#64748b">DP는 코어 상태와 독립적으로 응답해야 함</text>
+    <text x="922" y="366" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="60" y="390" width="880" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="408" font-weight="700" fill="#334155">⑨ 전력단 사고 (과전압 · 역결선 · FET 단락)</text>
+    <text x="76" y="424" fill="#64748b">XT30 전원 인가 이력 없음 · 모터 미연결 — USB 전원만으로 다룸</text>
+    <text x="922" y="416" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+  </g>
+
+  <line x1="500" y1="430" x2="500" y2="456" stroke="#374151" stroke-width="2" marker-end="url(#a8)"/>
+
+  <rect x="140" y="456" width="720" height="68" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+  <text x="500" y="480" font-size="15" font-weight="700" text-anchor="middle" fill="#065f46">결정적 단서: STLinkUpgrade가 펌웨어 재기록에 성공</text>
+  <text x="500" y="502" font-size="13" text-anchor="middle" fill="#047857">온보드 ST-LINK(STM32F103)는 완전히 건강 — USB 열거 · bootloader 진입 · 플래시 쓰기 · VTARGET 센싱 모두 정상</text>
+  <text x="500" y="518" font-size="13" text-anchor="middle" font-weight="700" fill="#065f46">→ 고장 지점은 ST-LINK ↔ STM32G431 구간 또는 G431 자체로 확정</text>
+
+  <line x1="500" y1="524" x2="500" y2="550" stroke="#374151" stroke-width="2" marker-end="url(#a8)"/>
+
+  <rect x="200" y="550" width="600" height="60" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+  <text x="500" y="574" font-size="16" font-weight="700" text-anchor="middle" fill="#92400e">원인: 납땜 중 부품 과열로 고장 (2026-10-07 사용자 보고)</text>
+  <text x="500" y="598" font-size="13" text-anchor="middle" fill="#b45309">ESD 가설 기각 · 당시 진단은 최근 재작업(납땜) 이력을 확인하지 않았음</text>
+
+  <line x1="500" y1="610" x2="500" y2="630" stroke="#374151" stroke-width="2" marker-end="url(#a8)"/>
+
+  <rect x="140" y="630" width="720" height="56" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2.5"/>
+  <text x="500" y="654" font-size="15" font-weight="700" text-anchor="middle" fill="#14532d">조치: 새 보드 구매 → 교체 절차(BOARD_REPLACEMENT.md)로 bring-up</text>
+  <text x="500" y="676" font-size="13" text-anchor="middle" fill="#166534">재발 방지: ESC에 직접 납땜 금지(커넥터) · 인두 3초 이내 · 작업 후 3V3/SWD 확인 · 이력 기록</text>
+</svg>
