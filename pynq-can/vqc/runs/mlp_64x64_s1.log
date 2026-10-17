@@ -1,0 +1,31 @@
+MLP hidden=64,64 params=4673
+[BC 0] mse=0.014292 (label var 0.02414)  2s
+[BC 100] mse=0.000119 (label var 0.02414)  2s
+[BC 200] mse=0.000097 (label var 0.02414)  3s
+[BC 300] mse=0.000080 (label var 0.02414)  3s
+[BC 400] mse=0.000080 (label var 0.02414)  3s
+[BC 500] mse=0.000081 (label var 0.02414)  4s
+after BC: {'pd': {'rms_mrad': 8.604, 'max_mrad': 38.16, 'dtau_rms': 0.0}, 'model_ff': {'rms_mrad': 1.44, 'max_mrad': 9.09, 'dtau_rms': 0.00111}, 'vqc': {'rms_mrad': 1.538, 'max_mrad': 15.09, 'dtau_rms': 0.00107}}
+[BPTT 0] loss=0.062 eval={'rms_mrad': 9.35, 'max_mrad': 17.64, 'dtau_rms': 0.0022}  9s
+[BPTT 10] loss=0.078 eval={'rms_mrad': 1.446, 'max_mrad': 11.7, 'dtau_rms': 0.00132}  23s
+[BPTT 20] loss=0.052 eval={'rms_mrad': 1.452, 'max_mrad': 14.47, 'dtau_rms': 0.00117}  37s
+[BPTT 30] loss=0.052 eval={'rms_mrad': 1.179, 'max_mrad': 13.56, 'dtau_rms': 0.00128}  51s
+[BPTT 40] loss=0.043 eval={'rms_mrad': 1.264, 'max_mrad': 14.59, 'dtau_rms': 0.00118}  65s
+[BPTT 50] loss=0.048 eval={'rms_mrad': 1.236, 'max_mrad': 14.9, 'dtau_rms': 0.00116}  79s
+[BPTT 60] loss=0.048 eval={'rms_mrad': 1.122, 'max_mrad': 13.61, 'dtau_rms': 0.00123}  93s
+[BPTT 70] loss=0.039 eval={'rms_mrad': 1.105, 'max_mrad': 13.3, 'dtau_rms': 0.00123}  107s
+[BPTT 80] loss=0.038 eval={'rms_mrad': 1.182, 'max_mrad': 14.27, 'dtau_rms': 0.00118}  122s
+[BPTT 90] loss=0.045 eval={'rms_mrad': 1.14, 'max_mrad': 14.01, 'dtau_rms': 0.00119}  136s
+[BPTT 100] loss=0.034 eval={'rms_mrad': 1.177, 'max_mrad': 14.27, 'dtau_rms': 0.00118}  151s
+[BPTT 110] loss=0.039 eval={'rms_mrad': 1.146, 'max_mrad': 13.89, 'dtau_rms': 0.00119}  165s
+[BPTT 120] loss=0.038 eval={'rms_mrad': 1.117, 'max_mrad': 13.85, 'dtau_rms': 0.0012}  187s
+[BPTT 130] loss=0.037 eval={'rms_mrad': 1.142, 'max_mrad': 14.04, 'dtau_rms': 0.0012}  207s
+[BPTT 140] loss=0.037 eval={'rms_mrad': 1.112, 'max_mrad': 13.07, 'dtau_rms': 0.00126}  221s
+[BPTT 150] loss=0.036 eval={'rms_mrad': 1.112, 'max_mrad': 13.65, 'dtau_rms': 0.00122}  236s
+[BPTT 160] loss=0.038 eval={'rms_mrad': 1.128, 'max_mrad': 13.98, 'dtau_rms': 0.0012}  251s
+[BPTT 170] loss=0.041 eval={'rms_mrad': 1.117, 'max_mrad': 13.79, 'dtau_rms': 0.00121}  265s
+[BPTT 180] loss=0.037 eval={'rms_mrad': 1.116, 'max_mrad': 13.85, 'dtau_rms': 0.00121}  280s
+[BPTT 190] loss=0.033 eval={'rms_mrad': 1.118, 'max_mrad': 13.87, 'dtau_rms': 0.00121}  295s
+[BPTT 199] loss=0.037 eval={'rms_mrad': 1.119, 'max_mrad': 13.88, 'dtau_rms': 0.00121}  308s
+final: {'randomized': {'pd': {'rms_mrad': 8.789, 'max_mrad': 36.39, 'dtau_rms': 0.0}, 'model_ff': {'rms_mrad': 1.55, 'max_mrad': 8.09, 'dtau_rms': 0.00112}, 'vqc': {'rms_mrad': 1.02, 'max_mrad': 12.25, 'dtau_rms': 0.00125}}, 'nominal': {'pd': {'rms_mrad': 8.531, 'max_mrad': 30.77, 'dtau_rms': 0.0}, 'model_ff': {'rms_mrad': 1.099, 'max_mrad': 4.15, 'dtau_rms': 0.0011}, 'vqc': {'rms_mrad': 0.62, 'max_mrad': 7.12, 'dtau_rms': 0.00122}}}
+saved runs/mlp_64x64_s1.json

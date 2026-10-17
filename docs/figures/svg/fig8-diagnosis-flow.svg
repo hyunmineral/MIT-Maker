@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1000" height="700" fill="#ffffff"/>
+  <text x="500" y="36" font-size="23" font-weight="700" text-anchor="middle" fill="#1a1a2e">Figure 8. Troubleshooting — diagnosing the SWD no-response and its cause</text>
+  <text x="500" y="60" font-size="13" text-anchor="middle" fill="#6b7280">Symptom: Unable to get core ID · target voltage 3.21 V (normal)</text>
+
+  <rect x="340" y="78" width="320" height="52" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="500" y="100" font-size="15" font-weight="700" text-anchor="middle" fill="#991b1b">SWD/JTAG debug port: no response</text>
+  <text x="500" y="120" font-size="12" text-anchor="middle" fill="#b91c1c">OK 09-20 → stored 2 weeks → dead 10-03 (2026)</text>
+
+  <line x1="500" y1="130" x2="500" y2="156" stroke="#374151" stroke-width="2" marker-end="url(#a8)"/>
+  <defs><marker id="a8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#374151"/></marker></defs>
+
+  <text x="60" y="176" font-size="15" font-weight="700" fill="#0f172a">9 hypotheses ruled out</text>
+
+  <g font-size="12">
+    <rect x="60" y="190" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="208" font-weight="700" fill="#334155">① Baud-rate mismatch</text>
+    <text x="76" y="224" fill="#64748b">Swept 6 rates on COM4 → 0 bytes on all</text>
+    <text x="462" y="216" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="520" y="190" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="536" y="208" font-weight="700" fill="#334155">② Old ST-LINK firmware</text>
+    <text x="536" y="224" fill="#64748b">Already V2J48M35 (not the faulty V2J28)</text>
+    <text x="922" y="216" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="60" y="240" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="258" font-weight="700" fill="#334155">③ Lingering Java/CLI process</text>
+    <text x="76" y="274" fill="#64748b">Confirmed: no such process</text>
+    <text x="462" y="266" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="520" y="240" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="536" y="258" font-weight="700" fill="#334155">④ USB re-plug / ST-LINK bad state</text>
+    <text x="536" y="274" fill="#64748b">All 3 interfaces re-enumerate; still fails</text>
+    <text x="922" y="266" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="60" y="290" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="308" font-weight="700" fill="#334155">⑤ RDP Level 2 (debug permanently locked)</text>
+    <text x="76" y="324" fill="#64748b">OPTR=0xFBEFF8AA → RDP=0xAA = Level 0</text>
+    <text x="462" y="316" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="520" y="290" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="536" y="308" font-weight="700" fill="#334155">⑥ NRST reconfigured as GPIO</text>
+    <text x="536" y="324" fill="#64748b">NRST_MODE=0b11 = standard reset I/O</text>
+    <text x="922" y="316" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="60" y="340" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="358" font-weight="700" fill="#334155">⑦ SWD clock too fast</text>
+    <text x="76" y="374" fill="#64748b">480 / 100 / 15 / 5 kHz all fail</text>
+    <text x="462" y="366" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="520" y="340" width="420" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="536" y="358" font-weight="700" fill="#334155">⑧ Firmware remapped the SWD pins</text>
+    <text x="536" y="374" fill="#64748b">The DP must answer regardless of core state</text>
+    <text x="922" y="366" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+
+    <rect x="60" y="390" width="880" height="40" rx="5" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="76" y="408" font-weight="700" fill="#334155">⑨ Power-stage accident (overvoltage · reverse polarity · FET short)</text>
+    <text x="76" y="424" fill="#64748b">XT30 never powered · no motor connected — handled on USB power only</text>
+    <text x="922" y="416" font-size="16" text-anchor="end" fill="#dc2626">✕</text>
+  </g>
+
+  <line x1="500" y1="430" x2="500" y2="456" stroke="#374151" stroke-width="2" marker-end="url(#a8)"/>
+
+  <rect x="140" y="456" width="720" height="68" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+  <text x="500" y="480" font-size="15" font-weight="700" text-anchor="middle" fill="#065f46">Decisive clue: STLinkUpgrade successfully rewrote the ST-LINK firmware</text>
+  <text x="500" y="502" font-size="13" text-anchor="middle" fill="#047857">On-board ST-LINK (STM32F103) is healthy — USB enumeration, bootloader, flash write, VTARGET sensing all OK</text>
+  <text x="500" y="518" font-size="13" text-anchor="middle" font-weight="700" fill="#065f46">→ Fault located between ST-LINK ↔ STM32G431, or in the G431 itself</text>
+
+  <line x1="500" y1="524" x2="500" y2="550" stroke="#374151" stroke-width="2" marker-end="url(#a8)"/>
+
+  <rect x="200" y="550" width="600" height="60" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+  <text x="500" y="574" font-size="16" font-weight="700" text-anchor="middle" fill="#92400e">Cause: a part overheated during soldering (user report, 2026-10-07)</text>
+  <text x="500" y="598" font-size="13" text-anchor="middle" fill="#b45309">ESD hypothesis rejected · the original diagnosis missed the recent soldering rework</text>
+
+  <line x1="500" y1="610" x2="500" y2="630" stroke="#374151" stroke-width="2" marker-end="url(#a8)"/>
+
+  <rect x="140" y="630" width="720" height="56" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2.5"/>
+  <text x="500" y="654" font-size="15" font-weight="700" text-anchor="middle" fill="#14532d">Action: new board installed 2026-10-13 (BOARD_REPLACEMENT.md)</text>
+  <text x="500" y="676" font-size="13" text-anchor="middle" fill="#166534">Prevention: no soldering directly on the ESC (use connectors) · iron ≤ 3 s · check 3V3/SWD afterwards · keep a log</text>
+</svg>

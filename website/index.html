@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VQC Actuator Lab</title>
+<meta name="description" content="Interactive 3D simulation of a quantum-circuit (VQC) feed-forward policy controlling a 15:1 cycloidal robot actuator, accelerated on a PYNQ-Z2 FPGA.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%23e45756%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+</script>
+<script src="vendor/chart.umd.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="#hero"><span class="dot"></span>VQC Actuator Lab</a>
+  <div class="links">
+    <a href="#actuator">Actuator</a><a href="#system">System</a><a href="#simulator">Simulator</a>
+    <a href="#vqc">Inside the VQC</a><a href="#fpga">FPGA</a><a href="#results">Results</a><a href="#hardware">Hardware</a><a href="#status">Status</a>
+  </div>
+</nav>
+
+<header id="hero" class="hero">
+  <div id="hero3d" class="hero-3d"></div>
+  <div class="hero-copy">
+    <p class="eyebrow">Berkeley Humanoid Lite · single-joint study · final results (v2.4) · first real-hardware run 2026-10-13</p>
+    <h1>A quantum-circuit policy<br>driving a cycloidal robot joint</h1>
+    <p class="lede">A 6-qubit variational quantum circuit (72 trained angles) adds feed-forward torque on top of the
+      motor controller's PD loop. The circuit is simulated on the FPGA fabric of a PYNQ-Z2; the 1&nbsp;kHz control stack
+      was measured on the board with an emulated motor controller, and on 2026-10-13 the real actuator was driven
+      open-loop from the PYNQ over CAN. Everything on this page runs the same models we trained and measured.</p>
+    <div class="chips">
+      <div class="chip"><b>72</b><span>trained circuit angles</span></div>
+      <div class="chip"><b>22.5&nbsp;µs</b><span>PL state-vector core @ 100&nbsp;MHz</span></div>
+      <div class="chip"><b>4.1&nbsp;µs</b><span>p99 loop jitter at 1&nbsp;kHz</span></div>
+      <div class="chip"><b>4,000 / 0</b><span>real CAN commands / missed replies (open loop)</span></div>
+    </div>
+    <div class="cta"><a class="btn primary" href="#simulator">Run the simulator</a><a class="btn" href="#results">See the verdict</a><a class="btn" href="#hardware">Real hardware</a></div>
+  </div>
+  <div class="hero-hud" id="heroHud">live: PD + VQC · sine 0.3 rad</div>
+</header>
+
+<section id="actuator" class="section">
+  <div class="section-head">
+    <p class="eyebrow">01 · Hardware</p>
+    <h2>The actuator, built from its real printable parts</h2>
+    <p>The 3D model is assembled from the project's own STL files (housing, 16-pin ring, 15-lobe cycloidal disc,
+      eccentric input shaft, output carrier). Drag to orbit, explode it, or cut the housing open. The motion is
+      kinematically correct: the motor turns 15 times for every output turn, and the disc wobbles on a
+      1.25&nbsp;mm eccentric while it slowly rolls around the ring pins.</p>
+  </div>
+  <div class="split">
+    <div class="viewer" id="act3d"></div>
+    <div class="panel">
+      <label class="ctl">Explode <input type="range" id="explode" min="0" max="1" step="0.01" value="0"></label>
+      <label class="ctl">Output angle q <input type="range" id="manualQ" min="-3.14" max="3.14" step="0.01" value="0"></label>
+      <div class="row"><label><input type="checkbox" id="cutaway"> Cut-away housing</label>
+        <label><input type="checkbox" id="spin" checked> Animate</label></div>
+      <dl class="specs">
+        <dt>Motor</dt><dd>MAD 5010 110KV, 14 pole pairs, K<sub>t</sub> 0.1176 N·m/A</dd>
+        <dt>Reducer</dt><dd>Cycloidal 15 : 1, 16 ring pins, 1.25 mm eccentric</dd>
+        <dt>Driver</dt><dd>B-G431B-ESC1 (STM32G431), Recoil firmware, FOC 10 kHz, position PD 2 kHz · new board since 2026-10-13</dd>
+        <dt>Sensor</dt><dd>AS5600 12-bit magnetic encoder (4096 CPR, firmware setting) — not yet fitted on the test joint</dd>
+        <dt>Readout</dt><dd id="kinReadout">motor 0.0° · disc 0.0° · output 0.0°</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section id="system" class="section alt">
+  <div class="section-head">
+    <p class="eyebrow">02 · Architecture</p>
+    <h2>Residual control: the firmware stabilises, the circuit anticipates</h2>
+    <p>The motor controller keeps its own position loop. Every millisecond the PYNQ-Z2 sends the target angle
+      and a feed-forward torque τ<sub>ff</sub> in one CAN frame (Recoil RPDO3) and reads back position and torque.
+      A wrong policy output can only degrade tracking — it cannot destabilise the joint.</p>
+  </div>
+  <div class="arch" id="arch">
+    <div class="node ps"><h4>PYNQ-Z2 · PS</h4><p>Cortex-A9 Linux<br>trajectory · observation · safety<br><em>1 kHz, SCHED_FIFO</em></p></div>
+    <div class="link"><span>cos/sin(x/2) ×12<br>AXI-Lite</span></div>
+    <div class="node pl"><h4>PYNQ-Z2 · PL</h4><p>vqc_top (HLS)<br>64 amplitudes · 24 gates · 4 CNOT rings<br><em>22.5 µs @ 100 MHz</em></p></div>
+    <div class="link"><span>⟨Z₀⟩ → τ<sub>ff</sub></span></div>
+    <div class="node can"><h4>PS CAN0 → Pmod JA</h4><p>1 Mbps, sample point 0.8<br>RPDO3 [q<sub>ref</sub>, τ<sub>ff</sub>]<br><em>TPDO3 [q, τ]</em></p></div>
+    <div class="link"><span>CAN bus</span></div>
+    <div class="node esc"><h4>B-G431B-ESC1</h4><p>τ = k<sub>p</sub>(q<sub>ref</sub>−q) − k<sub>d</sub>q̇ + τ<sub>ff</sub><br>EMA · clamp · FOC<br><em>2 kHz / 10 kHz</em></p></div>
+    <div class="link"><span>3-phase</span></div>
+    <div class="node motor"><h4>Actuator</h4><p>MAD 5010 + 15:1 cycloidal<br>encoder 4096 CPR</p></div>
+  </div>
+  <div class="layers">
+    <div><b>10 kHz</b><span>current (FOC) · ESC</span></div>
+    <div><b>2 kHz</b><span>position PD · ESC</span></div>
+    <div><b>1 kHz</b><span>VQC feed-forward · PYNQ PS+PL</span></div>
+    <div><b>1 kHz</b><span>trajectory &amp; safety · PYNQ PS</span></div>
+  </div>
+  <div class="callout">
+    <b>On the real hardware so far.</b> The 1 kHz figures come from the PYNQ-Z2 with an emulated motor controller.
+    The on-chip PS CAN0 + SN65HVD230 path does not work yet; the 2026-10-13 run used a CANable 2.0 USB adapter
+    (round trip ≈ 1.8 ms, too slow for 1 kHz) and an open-loop firmware build because no encoder is fitted
+    (<a href="#hardware">details</a>).
+  </div>
+</section>
+
+<section id="simulator" class="section">
+  <div class="section-head">
+    <p class="eyebrow">03 · Simulator</p>
+    <h2>Run the controller yourself</h2>
+    <p>This is the same joint model, firmware loop and trained policies used for the report, running at 1 kHz in
+      your browser (the numbers match the PYNQ-Z2 runs: PD 6.01, model FF 0.17, VQC 1.21 mrad on the default sine).
+      Randomise the plant to see how each policy copes with inertia, friction and command delay it was never told about.</p>
+  </div>
+  <div class="sim">
+    <div class="sim-controls panel">
+      <label class="ctl">Policy
+        <select id="policy">
+          <option value="vqc" selected>PD + VQC (72 params)</option>
+          <option value="mlp">PD + MLP 6-8-1 (65 params)</option>
+          <option value="model_ff">PD + model feed-forward</option>
+          <option value="pd">PD only (firmware)</option>
+        </select></label>
+      <label class="ctl">Trajectory
+        <select id="traj"><option value="sine" selected>Sine</option><option value="multisine">Two sines</option><option value="chirp">Chirp</option><option value="step">Square / steps</option></select></label>
+      <label class="ctl">Amplitude <output id="ampV">0.30 rad</output><input type="range" id="amp" min="0.05" max="0.6" step="0.01" value="0.3"></label>
+      <label class="ctl">Frequency <output id="freqV">0.50 Hz</output><input type="range" id="freq" min="0.1" max="2" step="0.05" value="0.5"></label>
+      <details class="plant" open><summary>Plant (unknown to the policy)</summary>
+        <label class="ctl">Inertia J <output id="JV"></output><input type="range" id="J" min="0.007" max="0.028" step="0.0005"></label>
+        <label class="ctl">Coulomb friction <output id="tcV"></output><input type="range" id="tau_c" min="0.05" max="0.4" step="0.01"></label>
+        <label class="ctl">Command delay <output id="dlV"></output><input type="range" id="delay" min="0" max="2" step="1"></label>
+        <button class="btn small" id="randPlant">Randomise plant</button> <button class="btn small" id="nomPlant">Nominal</button>
+      </details>
+      <label class="ctl">Speed <select id="speed"><option value="1" selected>Real time</option><option value="0.25">¼× slow motion</option><option value="4">4× fast</option></select></label>
+      <div class="row"><button class="btn primary" id="restart">Restart</button><button class="btn" id="pause">Pause</button></div>
+      <div class="metrics">
+        <div><span>RMS error (t ≥ 1 s)</span><b id="mRms">–</b></div>
+        <div><span>Max error</span><b id="mMax">–</b></div>
+        <div><span>τ<sub>ff</sub> now</span><b id="mTau">–</b></div>
+        <div><span>policy params</span><b id="mParams">–</b></div>
+      </div>
+    </div>
+    <div class="sim-main">
+      <div class="viewer small" id="sim3d"></div>
+      <div class="charts">
+        <div class="chartbox"><h5>Position — target <i class="sw ref"></i> vs joint <i class="sw q"></i> [deg]</h5><canvas id="cPos"></canvas></div>
+        <div class="chartbox"><h5>Tracking error [mrad]</h5><canvas id="cErr"></canvas></div>
+        <div class="chartbox"><h5>Feed-forward τ<sub>ff</sub> <i class="sw ff"></i> and motor torque <i class="sw tm"></i> [N·m]</h5><canvas id="cTau"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="compare panel">
+    <div class="compare-head">
+      <div><h4>Head-to-head on 24 random plants</h4><p>Every policy drives the same 24 randomly drawn joints (inertia ×4, friction ×8, efficiency, 0–2 ms delay) on the trajectory above for 4 s.</p></div>
+      <button class="btn primary" id="compareBtn">Run comparison</button>
+    </div>
+    <div class="compare-body"><canvas id="cCompare"></canvas></div>
+  </div>
+</section>
+
+<section id="vqc" class="section alt">
+  <div class="section-head">
+    <p class="eyebrow">04 · Inside the circuit</p>
+    <h2>Six qubits, 64 amplitudes, one number out</h2>
+    <p>Each control tick, six features of the reference and the tracking state are squashed into rotation angles
+      x<sub>q</sub> = π·tanh(s<sub>q</sub>·f<sub>q</sub>) and re-uploaded in every layer. The trained rotations RX·RY·RZ are fused
+      into one 2×2 matrix per qubit and layer, a CNOT ring entangles neighbours, and the expectation of Z on
+      qubit 0 becomes τ<sub>ff</sub> = 0.8·tanh(2⟨Z₀⟩). Below is the live state of the circuit while the simulator runs.</p>
+  </div>
+  <div class="vqc-grid">
+    <div class="panel"><svg id="circuit" class="circuit"></svg></div>
+    <div class="panel">
+      <h5>|ψ|² over the 64 basis states (live)</h5>
+      <canvas id="cProb" class="prob"></canvas>
+      <div class="gauge-row">
+        <div class="gauge"><span>⟨Z₀⟩</span><div class="bar"><i id="zBar"></i></div><b id="zVal">0.000</b></div>
+        <div class="gauge"><span>τ<sub>ff</sub></span><div class="bar"><i id="tBar"></i></div><b id="tVal">0.000</b></div>
+      </div>
+      <p class="note">Blue bars add to ⟨Z₀⟩ (qubit 0 in |0⟩), red bars subtract. This is a classical simulation of the
+        circuit — exactly what the FPGA computes — not a quantum computer.</p>
+    </div>
+  </div>
+</section>
+
+<section id="fpga" class="section">
+  <div class="section-head">
+    <p class="eyebrow">05 · FPGA</p>
+    <h2>From 15,343 to 2,248 clock cycles</h2>
+    <p>The state-vector simulator was written once in C and compiled both for the ARM cores and, with Vitis HLS,
+      into a PL core. Five iterations took it from a design that could not meet 100 MHz to one that finishes in
+      22.5 µs. The decisive change was updating the state out-of-place (ping-pong buffers), which let every
+      butterfly start one clock after the previous one.</p>
+  </div>
+  <div class="grid3">
+    <div class="panel"><h5>HLS iterations — core latency at 100 MHz</h5><div class="cw"><canvas id="cHls"></canvas></div><p class="note">Red: estimated clock period above 10 ns (timing not met).</p></div>
+    <div class="panel"><h5>Inference path on the board (20,000 calls)</h5><div class="cw"><canvas id="cLat"></canvas></div><p class="note">PL path includes the PS-side pre/post-processing. p99 − p50 = 0.8 µs.</p></div>
+    <div class="panel"><h5>vqc_can0.bit utilisation (XC7Z020)</h5><div class="cw"><canvas id="cRes"></canvas></div><p class="note">Timing met at 100 MHz (WNS +0.366 ns).</p></div>
+  </div>
+  <div class="callout">
+    <b>Lesson from the bench.</b> The first full PL core passed C/RTL co-simulation but returned wrong values on
+    the board for mid-range tanh inputs. Moving tanh/cos/sin (13 scalars) to the ARM side and keeping only the
+    64-amplitude simulation in the fabric fixed it — and made the core smaller and faster.
+  </div>
+</section>
+
+<section id="results" class="section alt">
+  <div class="section-head">
+    <p class="eyebrow">06 · Results</p>
+    <h2>The circuit works — and a 65-parameter MLP works better</h2>
+    <p>All learned policies share the same inputs, output squashing and training (behaviour cloning followed by
+      closed-loop back-propagation through time with domain randomisation), three seeds each.</p>
+  </div>
+  <div class="split">
+    <div class="panel"><h5>Tracking error, randomised plants (256 episodes × 3 s)</h5><div class="cw tall"><canvas id="cPolicy"></canvas></div></div>
+    <div class="panel verdict">
+      <h4>Verdict</h4>
+      <ul>
+        <li><b>VQC helps:</b> about 6× lower error than the firmware PD alone.</li>
+        <li><b>But no parameter advantage:</b> an MLP with 65 weights has <span id="gapTxt">32 %</span> lower tracking error than the 72-angle circuit; a 4,673-weight MLP is no better than the small one.</li>
+        <li><b>The FPGA part delivers:</b> 2.2× faster than the ARM core with deterministic timing.</li>
+        <li><b>No quantum advantage is claimed:</b> six qubits are trivially simulable on a classical chip.</li>
+      </ul>
+      <table class="goals">
+        <tr><th>Goal</th><th>Target</th><th>Outcome</th></tr>
+        <tr><td>G1 joint control</td><td>modes &amp; tracking</td><td class="warn">partial: CAN mode changes + open-loop drive; no encoder, no tracking</td></tr>
+        <tr><td>G2 real-time host</td><td>1 kHz, jitter &lt; 20 µs</td><td class="warn">4.1 µs p99 (emulated ESC); real bus via USB adapter 1.8 ms RTT</td></tr>
+        <tr><td>G3 PL inference</td><td>&lt; 10 µs</td><td class="warn">22.5 µs core, 29 µs path</td></tr>
+        <tr><td>G4 vs MLP</td><td>≤ 25 % worse, 50× fewer params</td><td class="bad">rejected</td></tr>
+        <tr><td>G5 sim-to-real</td><td>no retraining</td><td class="warn">not run (needs an encoder)</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="hardware" class="section">
+  <div class="section-head">
+    <p class="eyebrow">07 · Real hardware · 2026-10-13</p>
+    <h2>First motion: the PYNQ drives the real actuator over CAN</h2>
+    <p>The motor controller that died from soldering heat was replaced by a new B-G431B-ESC1 and brought up from
+      scratch (ST-LINK firmware upgrade, option bytes, two-stage first flash). The test joint has no angle sensor
+      (AS5600), and the stock firmware waits forever for one, so an open-loop build rotates the stator field to the
+      commanded angle and the rotor follows like a stepper. This proves the whole command path —
+      PYNQ&nbsp;→&nbsp;CAN&nbsp;→&nbsp;ESC&nbsp;→&nbsp;motor — but it is <b>not</b> a closed-loop experiment:
+      the angles below are commands, not measurements.</p>
+  </div>
+  <div class="split">
+    <div class="panel"><h5>Commanded vs firmware-applied output angle — 20 s, 200 Hz sine 0.3 rad · 0.25 Hz [rad]</h5>
+      <div class="cw"><canvas id="cHwAngle"></canvas></div>
+      <p class="note">Raw log <code>docs/results/logs/openloop_pynq_2026-10-13.csv</code> (shown at 100 Hz). Applied − commanded
+        ≤ 7.0 mrad: each reply carries the angle applied for the previous command, so this is reply timing, not
+        tracking error. Output-shaft motion was confirmed by eye.</p></div>
+    <div class="panel"><h5>Phase current [A] (1.0 V drive amplitude, 2 s fade-in/out)</h5>
+      <div class="cw"><canvas id="cHwCur"></canvas></div>
+      <p class="note">Mean <span id="hwImean">0.80</span> A, max <span id="hwImax">1.37</span> A — current flows in the windings while the field rotates.</p></div>
+  </div>
+  <div class="split" style="margin-top:22px">
+    <div class="panel"><h5>CAN round-trip time [µs] vs the 1 ms control period</h5>
+      <div class="cw"><canvas id="cHwRtt"></canvas></div>
+      <p class="note">The USB adapter (CANable 2.0, slcan) adds ≈ 1.8 ms — longer than one 1 kHz period. The 1 kHz loop
+        needs the on-chip PS CAN0 + SN65HVD230 path, which does not work yet.</p></div>
+    <div class="panel verdict"><h4>The run in numbers</h4>
+      <table class="goals">
+        <tr><th>Item</th><th>Measured</th></tr>
+        <tr><td>Commands sent / replies missed</td><td id="hwFrames">4,000 / 0</td></tr>
+        <tr><td>RTT p50 / p99 / max</td><td id="hwRtt">1806 / 1966 / 11011 µs</td></tr>
+        <tr><td>Phase current mean / max</td><td>0.80 / 1.37 A</td></tr>
+        <tr><td>Mode changes over CAN</td><td>IDLE → open loop → DAMPING → IDLE, errors 0</td></tr>
+        <tr><td>Bus voltage (firmware)</td><td class="warn">13.5–14.1 V vs PSU set to 24 V — unresolved</td></tr>
+        <tr><td>Encoder</td><td class="bad">not fitted → no closed loop</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="callout">
+    <b>Why the bus stayed silent at first.</b> Four faults were stacked: the ESC's CAN pads needed a soldered header,
+    one wire was loose, CANH/CANL were swapped, and the bus had no termination (driving PC14 high switches the ESC's
+    120&nbsp;Ω on — inferred from the bus errors disappearing, not measured). A firmware bug then hid the fix: after
+    the error burst two stale frames stayed in the receive FIFO and the upstream handler read one frame per
+    interrupt, so every request was answered with the frame from two requests earlier. The handler now drains the FIFO.
+  </div>
+</section>
+
+<section id="status" class="section alt">
+  <div class="section-head">
+    <p class="eyebrow">08 · Honest status</p>
+    <h2>What was measured, and what is still missing</h2>
+  </div>
+  <div class="grid3">
+    <div class="panel ok"><h4>Measured on hardware</h4><ul>
+      <li>PS CAN0 → EMIO → Pmod JA bitstream, pin path verified</li>
+      <li>VQC PL core: 22.5 µs, PL ↔ PS within 4·10⁻⁷</li>
+      <li>1 kHz loop on the PYNQ-Z2, p99 jitter 4.1 µs</li>
+      <li>CAN loopback: 5000/5000 frames, ping-pong RTT 482 µs</li>
+      <li>New ESC (2026-10-13): open-loop drive from the PYNQ over CAN — 4,000 commands, 0 missed, RTT p50 1.81 ms (USB adapter)</li></ul></div>
+    <div class="panel mid"><h4>Measured in simulation / emulation</h4><ul>
+      <li>Joint dynamics and firmware PD (randomised plants)</li>
+      <li>VQC vs MLP vs model feed-forward comparison</li>
+      <li>ESC replaced by a byte-level Recoil emulator</li></ul></div>
+    <div class="panel no"><h4>Not done yet</h4><ul>
+      <li>Closed-loop control on the real joint and a real-hardware VQC vs MLP comparison — needs an AS5600 encoder</li>
+      <li>1 kHz CAN path: on-chip PS CAN0 + SN65HVD230 (not working yet; the USB adapter is too slow)</li>
+      <li>System identification and re-training on the real joint</li></ul></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p>VQC Actuator Lab · PYNQ-Z2 (XC7Z020) · Recoil / B-G431B-ESC1 · MAD 5010 + 15:1 cycloidal · final results v2.4 · 2026-10-17</p>
+  <p>Report, paper and beginner's guide: <code>D:\robot\docs</code> (final package <code>D:\robot\final_report_2026-10-17</code>) · Code: <code>D:\robot\pynq-can</code> · This site: <code>D:\robot\website</code></p>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

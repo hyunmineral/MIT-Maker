@@ -1,0 +1,16 @@
+[Unit]
+Description=Enable Zynq PS CAN0 via device-tree overlay and bring up can0 @ 1 Mbps
+After=sys-kernel-config.mount bootpy.service
+Requires=sys-kernel-config.mount
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'O=/sys/kernel/config/device-tree/overlays/can0; [ -d $O ] || { mkdir $O && cat /usr/local/lib/firmware/can0-enable.dtbo > $O/dtbo; }'
+ExecStart=/bin/sh -c 'for i in $(seq 50); do [ -e /sys/class/net/can0 ] && break; sleep 0.1; done'
+ExecStart=-/bin/bash -c '. /etc/profile.d/xrt_setup.sh >/dev/null 2>&1; /usr/local/share/pynq-venv/bin/python3 /usr/local/lib/firmware/load_overlay.py'
+ExecStart=/sbin/ip link set can0 up type can bitrate 1000000 sample-point 0.8 restart-ms 100 loopback off
+ExecStart=/sbin/ip link set can0 txqueuelen 100
+
+[Install]
+WantedBy=multi-user.target

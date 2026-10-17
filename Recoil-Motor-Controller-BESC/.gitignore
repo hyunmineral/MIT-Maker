@@ -1,0 +1,7 @@
+*.o
+*.elf
+*.list
+*.map
+
+# prebuilt firmware images in demo/ are tracked on purpose
+!demo/*.elf

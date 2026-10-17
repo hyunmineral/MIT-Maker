@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1000" height="620" fill="#ffffff"/>
+  <text x="500" y="40" font-size="25" font-weight="700" text-anchor="middle" fill="#1a1a2e">Figure 13. Control is split into 4 layers</text>
+  <text x="500" y="66" font-size="14" text-anchor="middle" fill="#6b7280">Lower layers are faster and simpler; upper layers are slower and smarter</text>
+
+  <rect x="150" y="96" width="700" height="92" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="2.5"/>
+  <text x="180" y="126" font-size="17" font-weight="700" fill="#4c1d95">Layer 4 · Trajectory and monitoring</text>
+  <text x="180" y="150" font-size="13.5" fill="#5b21b6">"Where should the joint go?" Makes the target angle, watches for faults</text>
+  <text x="180" y="174" font-size="13" fill="#6d28d9">Runs on: PYNQ-Z2 CPU (Linux)</text>
+  <rect x="700" y="112" width="130" height="60" rx="8" fill="#ffffff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="765" y="136" font-size="22" font-weight="700" text-anchor="middle" fill="#7c3aed">1 kHz</text>
+  <text x="765" y="158" font-size="12" text-anchor="middle" fill="#6d28d9">1,000 times/s</text>
+
+  <rect x="150" y="200" width="700" height="92" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="3"/>
+  <text x="180" y="230" font-size="17" font-weight="700" fill="#991b1b">Layer 3 · Policy inference  ← core of this work</text>
+  <text x="180" y="254" font-size="13.5" fill="#b91c1c">"How much force right now?" The VQC sets the added (feed-forward) torque</text>
+  <text x="180" y="278" font-size="13" fill="#dc2626">Runs on: PYNQ-Z2 FPGA — core 22.5 µs (29 µs incl. CPU prep, measured)</text>
+  <rect x="700" y="216" width="130" height="60" rx="8" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+  <text x="765" y="240" font-size="22" font-weight="700" text-anchor="middle" fill="#dc2626">1 kHz</text>
+  <text x="765" y="262" font-size="12" text-anchor="middle" fill="#b91c1c">1,000 times/s</text>
+
+  <rect x="150" y="304" width="700" height="92" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+  <text x="180" y="334" font-size="17" font-weight="700" fill="#92400e">Layer 2 · Position and velocity tracking</text>
+  <text x="180" y="358" font-size="13.5" fill="#b45309">"How far from the target?" Sets a current target to close the gap (PID)</text>
+  <text x="180" y="382" font-size="13" fill="#d97706">Runs on: motor-controller chip (STM32G431)</text>
+  <rect x="700" y="320" width="130" height="60" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+  <text x="765" y="344" font-size="22" font-weight="700" text-anchor="middle" fill="#d97706">2 kHz</text>
+  <text x="765" y="366" font-size="12" text-anchor="middle" fill="#b45309">2,000 times/s</text>
+
+  <rect x="150" y="408" width="700" height="92" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2.5"/>
+  <text x="180" y="438" font-size="17" font-weight="700" fill="#14532d">Layer 1 · FOC current control</text>
+  <text x="180" y="462" font-size="13.5" fill="#166534">"Current in each of the 3 wires?" The lowest-level math that spins the motor</text>
+  <text x="180" y="486" font-size="13" fill="#15803d">Runs on: motor-controller chip (STM32G431)</text>
+  <rect x="700" y="424" width="130" height="60" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="2"/>
+  <text x="765" y="448" font-size="22" font-weight="700" text-anchor="middle" fill="#16a34a">10 kHz</text>
+  <text x="765" y="470" font-size="12" text-anchor="middle" fill="#15803d">10,000 times/s</text>
+
+  <line x1="110" y1="110" x2="110" y2="490" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#ad)"/>
+  <defs><marker id="ad" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#94a3b8"/></marker></defs>
+  <text x="76" y="300" font-size="14" font-weight="700" text-anchor="middle" fill="#64748b" transform="rotate(-90 76 300)">Faster and faster</text>
+
+  <rect x="50" y="520" width="910" height="80" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="70" y="546" font-size="15" font-weight="700" fill="#0f172a">Why not move FOC to the FPGA?</text>
+  <text x="70" y="570" font-size="13.5" fill="#334155">FOC already runs reliably 10,000 times a second on the motor-controller chip. Moving what works gains nothing and only adds risk.</text>
+  <text x="70" y="592" font-size="13.5" fill="#334155">So the FPGA was given only the new job, &quot;policy inference&quot; — each part does what it does best.</text>
+</svg>
