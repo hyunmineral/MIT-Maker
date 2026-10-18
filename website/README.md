@@ -2,7 +2,7 @@
 
 ```
 cd website
-python -m http.server 8765 --bind 127.0.0.1
+python3 -m http.server 8765 --bind 127.0.0.1
 # open http://127.0.0.1:8765/
 ```
 (ES modules and `fetch` need an HTTP server; opening `index.html` from disk will not work.)
