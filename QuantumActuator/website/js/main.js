@@ -29,10 +29,14 @@ function addView(id, opts) {
 const hero = addView("hero3d", { autoRotate: true, labels: false, dial: false, cameraPos: [300, 150, 330] });
 hero.controls.target.set(45, 0, -15);
 if (window.innerWidth < 1100) { hero.camera.position.multiplyScalar(1.35); hero.controls.target.set(35, 10, -15); }
-const act = addView("act3d", { labels: true, dial: false, ghost: false, cameraPos: [330, 150, 40] });
+// fitRadius: the output arm reaches 131 mm from the axis and the dial is r = 140, so both views
+// keep that sweep in frame whatever the panel's aspect ratio.
+const act = addView("act3d", { labels: true, dial: false, ghost: false, cameraPos: [330, 150, 40], fitRadius: 145 });
 act.controls.target.set(0, 0, -15);
-const simView = addView("sim3d", { labels: false, cameraPos: [40, 60, 560] });
-simView.controls.target.set(40, 0, 0);
+act.fit();
+const simView = addView("sim3d", { labels: false, cameraPos: [40, 60, 560], fitRadius: 152 });
+simView.controls.target.set(0, 0, 0);
+simView.fit();
 
 // ------------------------------------------------------------------ hero: background VQC run
 let heroRun = new Run(P, makePolicy("vqc"), { traj: "sine", amp: 0.3, freq: 0.5 });

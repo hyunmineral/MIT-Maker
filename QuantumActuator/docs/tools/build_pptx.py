@@ -10,7 +10,7 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
 from pptx.util import Emu, Pt
 
-from office_clean import clean_theme_fonts
+from QuantumActuator.docs.tools.office_clean import clean_theme_fonts
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCS = os.path.dirname(HERE)

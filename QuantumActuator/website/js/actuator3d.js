@@ -36,8 +36,9 @@ async function loadGeometry(base, name) {
 }
 
 export class ActuatorView {
-  constructor(container, { modelBase = "models", autoRotate = false, labels = true, background = null, cameraPos, dial = true, ghost = true } = {}) {
+  constructor(container, { modelBase = "models", autoRotate = false, labels = true, background = null, cameraPos, dial = true, ghost = true, fitRadius = 0 } = {}) {
     this.opt = { dial, ghost };
+    this.fitRadius = fitRadius;   // mm around controls.target that must stay in frame at any aspect ratio (0 = fixed camera)
     this.container = container;
     this.explode = 0; this.explodeTarget = 0;
     this.cutaway = false;
@@ -196,6 +197,21 @@ export class ActuatorView {
     if (!w || !h) return;
     this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h); this.labelRenderer.setSize(w, h);
+    this.fit();
+  }
+
+  // Keep a sphere of fitRadius around the orbit target inside the narrower of the two FOVs.
+  // A fixed camera distance clips the arm and dial in tall, narrow panels.
+  fit() {
+    if (!this.fitRadius) return;
+    const vHalf = THREE.MathUtils.degToRad(this.camera.fov) / 2;
+    const hHalf = Math.atan(Math.tan(vHalf) * this.camera.aspect);
+    const dist = this.fitRadius / Math.sin(Math.min(vHalf, hHalf));
+    const dir = this.camera.position.clone().sub(this.controls.target).normalize();
+    this.camera.position.copy(this.controls.target).addScaledVector(dir, dist);
+    this.camera.far = Math.max(5000, dist + this.fitRadius * 4);   // a far plane short of the model hides it
+    this.camera.updateProjectionMatrix();
+    this.controls.update();
   }
 
   render() {
