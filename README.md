@@ -20,26 +20,6 @@ PYNQ-Z2 PL: 64-amplitude state-vector core (22.5 µs @ 100 MHz)
 
 **Status:** the VQC cuts tracking error about 6× versus PD alone (simulation). However, a 65-parameter MLP does better, so there is no parameter advantage for the circuit. On real hardware, open-loop drive over CAN works. Closed loop still needs an encoder.
 
-### Test result: the VQC vs. a classical neural network
-
-![VQC vs. MLP: simulated tracking error and error vs. parameter count](QuantumActuator/docs/figures/png/fig3-vqc-vs-mlp.png)
-
-Every policy was trained the same way and tested in simulation on 256 randomised joints (varied inertia, friction and command delay). Each learned policy was trained with 3 seeds. Lower tracking error is better.
-
-| Policy | Trainable parameters | RMS tracking error (mrad) |
-|---|---|---|
-| PD only (firmware) | — | 8.79 |
-| PD + physics-model feed-forward | — | 1.55 |
-| **PD + VQC** (6 qubits, 4 layers) | 72 | **1.43 ± 0.08** |
-| **PD + MLP 6-8-1** (small neural network) | 65 | **0.98 ± 0.01** |
-| PD + MLP 6-64-64-1 (large neural network) | 4,673 | 1.01 ± 0.01 |
-
-- **The circuit works:** it cuts the error about 6× compared with the PD controller alone.
-- **But a neural network of the same size works better:** the 65-parameter MLP has about 32% lower error than the 72-parameter VQC, with fewer parameters. The right-hand plot shows this: the VQC (red) sits above the small MLP (orange).
-- **No quantum advantage is claimed.** Six qubits are easy to simulate on a classical chip, and here they don't buy any parameter efficiency.
-
-The numbers come from [`QuantumActuator/docs/results/results.json`](QuantumActuator/docs/results/results.json). The training runs behind them are in [`QuantumActuator/pynq-can/vqc/runs/`](QuantumActuator/pynq-can/vqc/runs/).
-
 ### Photos
 
 <table>
@@ -78,6 +58,26 @@ python3 -m http.server 8765 --bind 127.0.0.1    # then open http://127.0.0.1:876
 ```
 
 Opening `index.html` directly from disk does not work, because the 3D models and data are fetched over HTTP. Simulation, training, firmware and board setup are covered in [`QuantumActuator/README.md`](QuantumActuator/README.md) and [`QuantumActuator/DEVELOPMENT.md`](QuantumActuator/DEVELOPMENT.md).
+
+### Test result: the VQC vs. a classical neural network
+
+![VQC vs. MLP: simulated tracking error and error vs. parameter count](QuantumActuator/docs/figures/png/fig3-vqc-vs-mlp.png)
+
+Every policy was trained the same way and tested in simulation on 256 randomised joints (varied inertia, friction and command delay). Each learned policy was trained with 3 seeds. Lower tracking error is better.
+
+| Policy | Trainable parameters | RMS tracking error (mrad) |
+|---|---|---|
+| PD only (firmware) | — | 8.79 |
+| PD + physics-model feed-forward | — | 1.55 |
+| **PD + VQC** (6 qubits, 4 layers) | 72 | **1.43 ± 0.08** |
+| **PD + MLP 6-8-1** (small neural network) | 65 | **0.98 ± 0.01** |
+| PD + MLP 6-64-64-1 (large neural network) | 4,673 | 1.01 ± 0.01 |
+
+- **The circuit works:** it cuts the error about 6× compared with the PD controller alone.
+- **But a neural network of the same size works better:** the 65-parameter MLP has about 32% lower error than the 72-parameter VQC, with fewer parameters. The right-hand plot shows this: the VQC (red) sits above the small MLP (orange).
+- **No quantum advantage is claimed.** Six qubits are easy to simulate on a classical chip, and here they don't buy any parameter efficiency.
+
+The numbers come from [`QuantumActuator/docs/results/results.json`](QuantumActuator/docs/results/results.json). The training runs behind them are in [`QuantumActuator/pynq-can/vqc/runs/`](QuantumActuator/pynq-can/vqc/runs/).
 
 ---
 
