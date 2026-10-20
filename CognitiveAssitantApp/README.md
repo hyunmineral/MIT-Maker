@@ -175,6 +175,22 @@ Tests/                  88 tests. Run without a device
 Tools/                  check-captions (line budget) · archive (TestFlight) · icon generation
 ```
 
+| Folder | Link |
+|---|---|
+| App shell · modes · consent | [`Sources/App/`](Sources/App/) |
+| Design tokens · face shapes · canvas | [`Sources/DesignSystem/`](Sources/DesignSystem/) |
+| Script · state machine · metrics · form of address | [`Sources/Models/`](Sources/Models/) |
+| SwiftData memory store | [`Sources/Memory/`](Sources/Memory/) |
+| Speech recognition · echo detection | [`Sources/Speech/`](Sources/Speech/) |
+| Fact extraction · next-move selection | [`Sources/Understanding/`](Sources/Understanding/) |
+| Face detection · matching · presence | [`Sources/Vision/`](Sources/Vision/) |
+| Elder screens · voice | [`Sources/Elder/`](Sources/Elder/) |
+| Staff screens · settings · probes | [`Sources/Staff/`](Sources/Staff/) |
+| Screen catalogue | [`Sources/Gallery/`](Sources/Gallery/) |
+| Tests | [`Tests/`](Tests/) |
+| Tools | [`Tools/`](Tools/) |
+| Design docs | [`Docs/`](Docs/) (start with [`00_doc-map.md`](Docs/00_doc-map.md)) |
+
 ### Metrics come only from records
 
 Three of the four metrics (recall rate · consistency · speech amount) are computed from stored records (`MetricEngine`).

@@ -30,11 +30,11 @@ Detailed results: [`docs/actuator-vqc-control-report.md`](docs/actuator-vqc-cont
 
 | Path | What |
 |---|---|
-| `pynq-can/` | Everything that runs on (or builds for) the PYNQ-Z2: `host/` (1 kHz controller, Recoil CAN protocol over SocketCAN/slcan, emulator, tests), `vqc/` (circuit model, training, C kernel, PL driver, trained runs), `hls/` (Vitis HLS core + testbench), `vivado/` (bitstream Tcl, board files, prebuilt `out/`), CAN0 device-tree overlay + boot service |
-| `Recoil-Motor-Controller-BESC/` | Recoil firmware for the B-G431B-ESC1 (upstream MIT) with local options (open loop without encoder, demo, CAN termination, RX FIFO fix); `demo/` holds the make-free build script, prebuilt ELFs and SWD tools |
-| `website/` | "VQC Actuator Lab": three.js actuator model from the real STLs, in-browser 1 kHz simulator, results and real-hardware pages |
-| `docs/` | Report, paper, beginner's guide, test scenario, hardware procedures (Markdown), figures, raw data (`results/`), and the tools that build figures/docx/pptx |
-| `hardware/` | Actuator CAD (printable STL parts) and PYNQ SD-card scripts |
+| [`pynq-can/`](pynq-can/) | Everything that runs on (or builds for) the PYNQ-Z2: [`host/`](pynq-can/host/) (1 kHz controller, Recoil CAN protocol over SocketCAN/slcan, emulator, tests), [`vqc/`](pynq-can/vqc/) (circuit model, training, C kernel, PL driver, trained runs — **the 6-qubit circuit is defined in [`vqc/vqc_model.py`](pynq-can/vqc/vqc_model.py)**), [`hls/`](pynq-can/hls/) (Vitis HLS core + testbench), [`vivado/`](pynq-can/vivado/) (bitstream Tcl, board files, prebuilt `out/`), CAN0 device-tree overlay + boot service |
+| [`Recoil-Motor-Controller-BESC/`](Recoil-Motor-Controller-BESC/) | Recoil firmware for the B-G431B-ESC1 (upstream MIT) with local options (open loop without encoder, demo, CAN termination, RX FIFO fix); [`demo/`](Recoil-Motor-Controller-BESC/demo/) holds the make-free build script, prebuilt ELFs and SWD tools |
+| [`website/`](website/) | "VQC Actuator Lab": three.js actuator model from the real STLs, in-browser 1 kHz simulator, results and real-hardware pages |
+| [`docs/`](docs/) | Report, paper, beginner's guide, test scenario, hardware procedures (Markdown), figures, raw data ([`results/`](docs/results/)), and the tools that build figures/docx/pptx |
+| [`hardware/`](hardware/) | Actuator CAD (printable STL parts) and PYNQ SD-card scripts |
 
 ## Quick start
 
