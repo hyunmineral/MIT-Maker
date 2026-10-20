@@ -1,4 +1,4 @@
-<!-- once you get in, just type open http://127.0.0.1:8765/ in the terminal.  -->
+<!-- once you get in, just type "open http://127.0.0.1:8765/" in the terminal.  -->
 
 ```
 cd website

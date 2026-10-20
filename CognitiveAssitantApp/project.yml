@@ -1,0 +1,102 @@
+name: RobotForElders
+
+options:
+  bundleIdPrefix: com.tictechtoe
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CODE_SIGN_STYLE: Automatic
+    # For device deployment. The team that the Apple Development: Hojun Park certificate belongs to.
+    DEVELOPMENT_TEAM: 3J58K2RH44
+
+targets:
+  RobotForElders:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tictechtoe.RobotForElders
+        PRODUCT_NAME: RobotForElders
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        # iPad only (2 = iPad). The robot face display is locked to portrait.
+        TARGETED_DEVICE_FAMILY: "2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIStatusBarHidden: YES
+        INFOPLIST_KEY_UIRequiresFullScreen: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: >-
+          UIInterfaceOrientationPortrait
+          UIInterfaceOrientationPortraitUpsideDown
+    info:
+      path: Resources/Info.plist
+      properties:
+        # **`Companion` already exists on the App Store, so uploads are rejected** (90129).
+        # The upload reports success and then fails silently during processing,
+        # so the only sign is "no builds". Keep this matching the app name in App Store Connect.
+        CFBundleDisplayName: Companion for Elders
+        # **Linked to the build settings.** Without this, xcodegen writes the literal 1.0 / 1,
+        # so changing MARKETING_VERSION and CURRENT_PROJECT_VERSION doesn't reach the app.
+        # This link is also what lets the archive script inject the build number.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: en
+        # Pinned to English alone regardless of the device language. Strings the system provides follow this too.
+        CFBundleLocalizations:
+          - en
+        # Only standard encryption (HTTPS) is used — exempt from export regulations. Without this key,
+        # every TestFlight upload requires answering the export compliance question by hand in App Store Connect.
+        ITSAppUsesNonExemptEncryption: false
+        UIStatusBarHidden: true
+        UIRequiresFullScreen: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+        # Actually used by face detection/matching (Vision) and speech recognition. Strings are en-US.
+        NSCameraUsageDescription: >-
+          Uses the front camera to recognize the person in front of the screen and greet them by name. Face data is analyzed and kept on this device only — no photos leave the iPad.
+        NSMicrophoneUsageDescription: >-
+          Uses the microphone to hear what the person says so the conversation can continue.
+        NSSpeechRecognitionUsageDescription: >-
+          Turns what the person says into text so the conversation can continue. Recognition runs on this device.
+
+  RobotForEldersTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: RobotForElders
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tictechtoe.RobotForEldersTests
+        GENERATE_INFOPLIST_FILE: YES
+        # Only verdicts that need no device, model or person live here. They must run remotely too.
+        SWIFT_VERSION: "5.0"
+
+schemes:
+  RobotForElders:
+    build:
+      targets:
+        RobotForElders: all
+        RobotForEldersTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - RobotForEldersTests

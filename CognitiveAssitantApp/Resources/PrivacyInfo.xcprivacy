@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Privacy manifest. Required for App Store upload.
+
+  This app **collects nothing** — face embeddings, conversation transcripts and cognitive metrics all
+  stay on the device and never go to a server (Docs/03_product-design.md section 9). Therefore
+  NSPrivacyCollectedDataTypes is empty.
+
+  ⚠️ Turning on cloud TTS (OpenAI) sends lines to an overseas server. That feature opens only with
+  overseas-transfer consent, and the deployment default is Apple's on-device voice. If the pilot actually
+  decides to use that path, collection items must be added to this file.
+
+  NSPrivacyAccessedAPITypes is the "required reason API" declaration. List only what is used.
+-->
+<plist version="1.0">
+<dict>
+    <key>NSPrivacyTracking</key>
+    <false/>
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <dict>
+            <!-- Mode, consent records, the auto-greet switch and voice settings are kept in UserDefaults.
+                 CA92.1 = this app reading values it wrote itself. -->
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>CA92.1</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

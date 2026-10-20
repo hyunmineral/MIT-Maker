@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- For TestFlight · App Store. Requires a distribution certificate and an App Store profile;
+         if missing, -allowProvisioningUpdates creates them. -->
+    <key>method</key>
+    <string>app-store-connect</string>
+    <key>teamID</key>
+    <string>3J58K2RH44</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <!-- Upload symbols too so crash logs are readable. Without this during the pilot
+         there's no finding out why it died on site. -->
+    <key>uploadSymbols</key>
+    <true/>
+    <!-- Bitcode is deprecated, and TestFlight handles app thinning on its own. -->
+    <key>destination</key>
+    <string>export</string>
+</dict>
+</plist>
